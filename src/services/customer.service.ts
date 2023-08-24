@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus, NotFoundException, ConflictException, InternalServerErrorException, BadRequestException, ExceptionFilter } from "@nestjs/common";
+import { Injectable, HttpStatus, NotFoundException, InternalServerErrorException, BadRequestException, } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "src/repository/user";
 import { Video } from "src/repository/video";
@@ -34,7 +34,6 @@ export class CustomerService {
             } else {
                 user.watchLaterVideos.push(video);
                 await this.userRepository.save(user);
-                // created 201 , data & message 
                 return {
                     code: HttpStatus.CREATED,
                     message: 'Video added to watch later list.',
@@ -72,7 +71,6 @@ export class CustomerService {
     }
 
     async removeVideoFromWatchLater(userId: number, videoId: string): Promise<any> {
-        console.log("remove API")
         try {
             const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['watchLaterVideos'] });
 

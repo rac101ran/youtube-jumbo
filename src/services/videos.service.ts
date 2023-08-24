@@ -26,13 +26,16 @@ export class VideoService {
                 take: limit,
             });
 
-            let totalVideos = 0 //  await this.cacheManager.get<number>("totalVideos")  
-            totalVideos = await this.videoRepository.count({ where: { videoId: Not(In(watchedVideoIds)) } });
+            // let totalVideos = await this.cacheManager.get<number>("totalVideos")  
             // if (!totalVideos || totalVideos === 0) {
             //     totalVideos = await this.videoRepository.count({ where: { videoId: Not(In(watchedVideoIds)) } });
             // }
 
-            console.log(`page total : ${Math.ceil(totalVideos / limit)} , page num : ${page}}`)
+            const totalVideos = await this.videoRepository.count({ where: { videoId: Not(In(watchedVideoIds)) } });
+
+
+
+            //  console.log(`page total : ${Math.ceil(totalVideos / limit)} , page num : ${page}}`)  Logging for checking current page
 
             return {
                 status: HttpStatus.OK,
@@ -44,6 +47,7 @@ export class VideoService {
                     totalPages: Math.ceil(totalVideos / limit)
                 }
             };
+
         } catch (error) {
             console.log(error.message)
             throw new HttpException('Error fetching videos', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,6 +67,7 @@ export class VideoService {
                 message: 'Video fetched successfully',
                 data: video,
             };
+
         } catch (error) {
             throw new HttpException('Error fetching video', HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -77,6 +82,7 @@ export class VideoService {
                 message: 'Videos fetched successfully',
                 data: videos,
             };
+
         } catch (error) {
             throw new HttpException('Error searching videos', HttpStatus.INTERNAL_SERVER_ERROR);
         }

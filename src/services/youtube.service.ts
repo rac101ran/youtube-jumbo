@@ -45,8 +45,11 @@ export class YoutubeCronService {
 
                 const cachedVideoId = await this.cacheManager.get(video.id)
                 if (!cachedVideoId) {
+
                     const existingVideo = await this.videoRepository.findOne({ where: { videoId: video.videoId } });
+
                     if (!existingVideo) {
+
                         const newVideo = this.videoRepository.create({
                             videoId: video.id,
                             title: this.handleSpecialCharacters(video.snippet.title),
@@ -55,18 +58,22 @@ export class YoutubeCronService {
                             thumbnailUrl: video.snippet.thumbnails.default.url,
                             publishedAt: video.snippet.publishedAt,
                         });
+
                         await this.videoRepository.save(newVideo);
                     }
-                    const val : number = await this.cacheManager.get("totalVideos")
-                    if(!val) {
-                        await this.cacheManager.set("totalVideos",1)
-                    }else {
-                        await this.cacheManager.set("totalVideos",val + 1)
+                    const val: number = await this.cacheManager.get("totalVideos")
+                    if (!val) {
+                        await this.cacheManager.set("totalVideos", 1)
+                    } else {
+                        await this.cacheManager.set("totalVideos", val + 1)
                     }
                     await this.cacheManager.set(video.videoId, video.statistics.viewCount);
                 }
+
             }
+
             this.logger.log('Fetched and stored videos:', videos);
+
         } catch (error) {
             console.log(error.message)
             throw new HttpException('Error fetching and storing videos', HttpStatus.INTERNAL_SERVER_ERROR);

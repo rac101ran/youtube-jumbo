@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus, NotFoundException, ConflictException, InternalServerErrorException , UnauthorizedException } from "@nestjs/common";
+import { Injectable, HttpStatus, NotFoundException, ConflictException, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "src/repository/user";
 import { Repository } from "typeorm";
@@ -12,7 +12,7 @@ export class UserService {
         const { user_email, user_name, password } = userInfo;
 
         try {
-            const hashedPassword = await bcrypt.hash(password, 10);  // Hash the password using bcrypt
+            const hashedPassword = await bcrypt.hash(password, 10);  // Hash the password using bcrypt , hash + salt this is better than standard rolling hash
 
 
             const user = this.userRepository.create({
@@ -39,20 +39,20 @@ export class UserService {
 
     async validateUser(email: string, password: string): Promise<any> {
         try {
-          const user = await this.userRepository.findOne({ where: { email } });
-    
-          if (user && (await bcrypt.compare(password, user.password))) {
-            const { password: userPassword, ...result } = user; // Remove password from the user object
-            return {
-              status: HttpStatus.OK,
-              message: 'Login Successful',
-              data: result,
-            };
-          } else {
-            throw new UnauthorizedException('Invalid credentials');
-          }
+            const user = await this.userRepository.findOne({ where: { email } });
+
+            if (user && (await bcrypt.compare(password, user.password))) {   // checking hashed password
+                const { password: userPassword, ...result } = user;
+                return {
+                    status: HttpStatus.OK,
+                    message: 'Login Successful',
+                    data: result,
+                };
+            } else {
+                throw new UnauthorizedException('Invalid credentials');
+            }
         } catch (error) {
-          throw new InternalServerErrorException('server error');
+            throw new InternalServerErrorException('server error');
         }
     }
 }
