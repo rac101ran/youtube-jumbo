@@ -1,15 +1,16 @@
-import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository, In } from 'typeorm';
 import { Video } from 'src/repository/video';
 import { Users } from 'src/repository/user';
-
+import { Cache } from 'cache-manager';
 @Injectable()
 export class VideoService {
     constructor(
         @InjectRepository(Video)
         private readonly videoRepository: Repository<Video>,
-        @InjectRepository(Users) private readonly userRepository: Repository<Users>
+        @InjectRepository(Users) private readonly userRepository: Repository<Users>,
+        @Inject('CACHE_MANAGER') private readonly cacheManager: Cache
     ) { }
 
     async getAllVideos(page: number, limit: number, userId: number) {
@@ -25,13 +26,22 @@ export class VideoService {
                 take: limit,
             });
 
+            let totalVideos = 0 //  await this.cacheManager.get<number>("totalVideos")  
+            totalVideos = await this.videoRepository.count({ where: { videoId: Not(In(watchedVideoIds)) } });
+            // if (!totalVideos || totalVideos === 0) {
+            //     totalVideos = await this.videoRepository.count({ where: { videoId: Not(In(watchedVideoIds)) } });
+            // }
+
+            console.log(`page total : ${Math.ceil(totalVideos / limit)} , page num : ${page}}`)
+
             return {
                 status: HttpStatus.OK,
                 message: 'Videos fetched successfully',
                 data: videos,
                 pageInfo: {
                     pageNum: page,
-                    limitPerPage: limit
+                    limitPerPage: limit,
+                    totalPages: Math.ceil(totalVideos / limit)
                 }
             };
         } catch (error) {

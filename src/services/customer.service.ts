@@ -72,6 +72,7 @@ export class CustomerService {
     }
 
     async removeVideoFromWatchLater(userId: number, videoId: string): Promise<any> {
+        console.log("remove API")
         try {
             const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['watchLaterVideos'] });
 

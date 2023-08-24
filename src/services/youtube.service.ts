@@ -45,20 +45,25 @@ export class YoutubeCronService {
 
                 const cachedVideoId = await this.cacheManager.get(video.id)
                 if (!cachedVideoId) {
-                    const existingVideo = await this.videoRepository.findOne({ where: { videoId: video.id } });
+                    const existingVideo = await this.videoRepository.findOne({ where: { videoId: video.videoId } });
                     if (!existingVideo) {
                         const newVideo = this.videoRepository.create({
                             videoId: video.id,
                             title: this.handleSpecialCharacters(video.snippet.title),
                             description: video.description = this.handleSpecialCharacters(video.snippet.description).substring(0, 10),
-                            videoUrl: `https://www.youtube.com/watch?v=${video.id}`,
+                            videoUrl: `https://www.youtube.com/watch?v=${video.videoId}`,
                             thumbnailUrl: video.snippet.thumbnails.default.url,
                             publishedAt: video.snippet.publishedAt,
                         });
-
                         await this.videoRepository.save(newVideo);
                     }
-                    await this.cacheManager.set(video.id, video.statistics.viewCount);
+                    const val : number = await this.cacheManager.get("totalVideos")
+                    if(!val) {
+                        await this.cacheManager.set("totalVideos",1)
+                    }else {
+                        await this.cacheManager.set("totalVideos",val + 1)
+                    }
+                    await this.cacheManager.set(video.videoId, video.statistics.viewCount);
                 }
             }
             this.logger.log('Fetched and stored videos:', videos);

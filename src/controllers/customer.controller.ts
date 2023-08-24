@@ -24,7 +24,7 @@ export class CustomerController {
         return this.customerService.getWatchLaterList(userId);
     }
 
-    @Delete(':userId/watch-later/:videoId')
+    @Post(':userId/delete-watch-later/:videoId')
     // @UseGuards(JwtAuthGuard) // Apply JWT authentication guard
     async removeVideoFromWatchLater(
         @Param('userId', ParseIntPipe) userId: number,

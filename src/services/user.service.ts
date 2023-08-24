@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus, NotFoundException, ConflictException, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, HttpStatus, NotFoundException, ConflictException, InternalServerErrorException , UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "src/repository/user";
 import { Repository } from "typeorm";
@@ -34,6 +34,25 @@ export class UserService {
             } else {
                 throw new InternalServerErrorException("An error occurred while creating the user.");
             }
+        }
+    }
+
+    async validateUser(email: string, password: string): Promise<any> {
+        try {
+          const user = await this.userRepository.findOne({ where: { email } });
+    
+          if (user && (await bcrypt.compare(password, user.password))) {
+            const { password: userPassword, ...result } = user; // Remove password from the user object
+            return {
+              status: HttpStatus.OK,
+              message: 'Login Successful',
+              data: result,
+            };
+          } else {
+            throw new UnauthorizedException('Invalid credentials');
+          }
+        } catch (error) {
+          throw new InternalServerErrorException('server error');
         }
     }
 }
